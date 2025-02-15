@@ -1,6 +1,6 @@
 import numpy as np 
 from port import Port
-from chain import inverse_kinematic
+from chain import inverse_kinematic, forward_kinematic
 import argparse
 import json
 import time
@@ -134,37 +134,7 @@ class Robot():
             # Сохраняем ответы в JSON файл
             with open(f'{filename}', 'w') as json_file:
                 json.dump(positions, json_file, indent=4)  # Сохраняем в формате JSON
-
-
-
-
-
-
-        # # pos = sefl.port.G01()
-        # # print("pos = ", pos)
-
-        # input_string = "J0: 0 J1: 0 J2: 0 J3: 0 J4: 0 J5: 0"
-
-        # # Преобразуем строку в словарь
-        # data = {}
-        # for pair in input_string.split():
-        #     key, value = pair.split(': ')
-        #     data[key] = int(value)  # Преобразуем значение в целое число
-
-        # # Пример доступа к параметрам
-        # print(data)  # {'J0': 0, 'J1': 0, 'J2': 0, 'J3': 0, 'J4': 0, 'J5': 0}
-
-        # # Получаем параметры
-        # j0 = data.get('J0', 'Не задано')
-        # j1 = data.get('J1', 'Не задано')
-        # j2 = data.get('J2', 'Не задано')
-        # j3 = data.get('J3', 'Не задано')
-        # j4 = data.get('J4', 'Не задано')
-        # j5 = data.get('J5', 'Не задано')
-
-        # print(f'J0: {j0}, J1: {j1}, J2: {j2}, J3: {j3}, J4: {j4}, J5: {j5}')
         
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     ARGS = [
@@ -214,6 +184,7 @@ if __name__ == '__main__':
 
     vec = [X, Y, Z]
     rot = [rX, rY, rZ]
+    print(rot)
 
     if start_filename is not None:
         robot.start_programm(start_filename)
@@ -222,7 +193,14 @@ if __name__ == '__main__':
     else:
         if sum([j0, j1, j2, j3, j4, j5]):
             print('joints')
+            fk = forward_kinematic(np.radians(j0), 
+                                   np.radians(j1),
+                                   np.radians(j2), 
+                                   np.radians(j3), 
+                                   np.radians(j4), 
+                                   np.radians(j5))
             robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+            
         else:
             print('coordinates')
             ik = inverse_kinematic(vec, rot)
