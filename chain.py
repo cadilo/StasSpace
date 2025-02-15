@@ -4,6 +4,8 @@ from ikpy.chain import Chain
 from ikpy.link import OriginLink, URDFLink
 from ikpy.inverse_kinematics import inverse_kinematic_optimization
 from ikpy.utils.geometry import from_transformation_matrix, to_transformation_matrix
+import numpy as np
+chain = Chain.from_urdf_file("description.urdf", active_links_mask=[0, 1, 1, 1, 1, 1, 1])
 
 def eul2rot(alpha, beta, gamma):
     # Преобразуем углы из градусов в радианы
@@ -54,8 +56,6 @@ def checking_for_availability(j1, j2, j3, j4, j5, j6):
             return False
     return True  # Все значения в пределах
 
-    
-
 def forward_to_inverse(j1, j2, j3, j4, j5, j6):
     target_joint_angels = [0, j1, j2, j3, j4, j5, j6]
     pk = chain.forward_kinematics(target_joint_angels) 
@@ -93,11 +93,11 @@ def forward_kinematic(j1, j2, j3, j4, j5, j6):
     print(f"Rotate non normilize: {Rotate} \n\r")
     rotate_normilize = rot2eul(Rotate)
     print(f"Rotate normilize: {rotate_normilize} \n\r")
+
+
     ax = matplotlib.pyplot.figure().add_subplot(111, projection='3d')
     chain.plot(target_joint_angels, ax)
     matplotlib.pyplot.show()
-
-
 
 def inverse_kinematic(vector, rotate):
     initial_joint_angels = [0, 0, 0.873, 1.265, 0, 0, 0]
@@ -123,13 +123,9 @@ def inverse_kinematic(vector, rotate):
     ax = matplotlib.pyplot.figure().add_subplot(111, projection='3d')
     chain.plot(invers_opt, ax)
     matplotlib.pyplot.show()
-
-
+    return invers_opt
 
 if __name__ == '__main__':
-    import numpy as np
-    chain = Chain.from_urdf_file("description.urdf", active_links_mask=[0, 1, 1, 1, 1, 1, 1])
-
     target_vector = [-0.0, -0.0, -0.33]
     target_rotate = [179.9677, -2.9292, -107.0298]
     target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])

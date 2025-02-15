@@ -1,12 +1,13 @@
 import numpy as np 
 from port import Port
+from chain import inverse_kinematic
 import argparse
 import json
 import time
 
 #usage_port = '/dev/pts/8'
-usage_port = '/dev/ttyUSB0'
-#usage_port = None
+#usage_port = '/dev/ttyUSB0'
+usage_port = None
 
 class RobotCalibration():
     k = np.array([
@@ -210,8 +211,10 @@ if __name__ == '__main__':
     speed = args.speed
     start_filename = args.start_programm
     write_filename = args.write_programm
-    # robot.set_speed(speed)
-    #robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+
+    vec = [X, Y, Z]
+    rot = [rX, rY, rZ]
+
     if start_filename is not None:
         robot.start_programm(start_filename)
     elif write_filename is not None:
@@ -219,67 +222,11 @@ if __name__ == '__main__':
     else:
         if sum([j0, j1, j2, j3, j4, j5]):
             print('joints')
-            # pk = my_chain.forward_kinematics([0,j0, j1, j2, j3, j4, j5,0])
-            # V, R = from_transformation_matrix(pk)
-            # A = rot2eul(R)
-            # print(V, A)
             robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
         else:
             print('coordinates')
-            # ik = my_chain.inverse_kinematics([X,Y,Z], [rX,rY,rZ], rot)
-            # j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik ][1:7]
+            ik = inverse_kinematic(vec, rot)
+            j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik ][1:7]
             print(j0, j1, j2, j3, j4, j5)
             robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
 
-
-    # try:
-    #     robot = Robot()
-
-    # except Exception:
-    #     print('working in emulated mode')
-    #     robot = Robot(port=None)
-    #     44 /     -70.0,
-    #     90 /    -182.5,
-    #     90 /     113.5,
-    #     90 /  115550.0,
-    #     90 /      90.0,
-
-    # target_frame = np.array([
-    #     [1, 0, 0, 0.315],  # x
-    #     [0, 1, 0, 0.0],  # y
-    #     [0, 0, 1, 0.100],  # z
-    #     [0, 0, 0, 1]     # Гомогенная часть
-    # ])
-
-    # initial_joint_angles = [0, 0, 0, 0, 50, 0] 
-
-    # robot.set_joint_pos(initial_joint_angles)
-    
-
-    # #invers = my_chain.inverse_kinematics(point1, rot1, "all")
-    # invers = inverse_kinematic_optimization(
-    # my_chain,
-    # target_frame,
-    # initial_joint_angles,
-    # orientation_mode="all"
-    # )
-    
-    # joints = [ round(x,7) for x in np.degrees(invers) ][1:7]
-    # print(joints)
-    
-    # fk = my_chain.forward_kinematics((0, invers[1], invers[2], invers[3], invers[4], invers[5], invers[6], 0))
-    # print("forward_kinematic:",fk)
-    # tm = from_transformation_matrix(fk)
-    # print(f"x: {tm[0][0]:f}")
-    # print(f"y: {tm[0][1]:f}")
-    # print(f"z: {tm[0][2]:f}")
-    # print("Начало координат инструмента: ", tm)
-
-    # print("Положение осей в радианах: ", invers)
-    # print("Положение осей в градусах: ", joints)
-    # robot.set_joint_pos(joints)
-
-    # ax = plt.figure().add_subplot(111, projection='3d')
-    # pl = my_chain.plot(invers, ax)
-    
-    # plt.show()
