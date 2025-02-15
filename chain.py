@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # to invers kinematic
     initial_joint_angels = [0, 0, 0.873, 1.265, 0, 0, 0]
 
-    #vector = np.array([-0.80, 0.0, 0.2])
+    vector = np.array([-0.80, 0.0, 0.2])
     #rot = np.array([179.9683, -67.5016, 179.9866])
     #k = to_transformation_matrix(vector, rot)
 
