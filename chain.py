@@ -1,7 +1,6 @@
 import matplotlib.pyplot
 
 from ikpy.chain import Chain
-from ikpy.link import OriginLink, URDFLink
 from ikpy.inverse_kinematics import inverse_kinematic_optimization
 from ikpy.utils.geometry import from_transformation_matrix, to_transformation_matrix
 import numpy as np
@@ -81,13 +80,13 @@ def forward_kinematic(j1, j2, j3, j4, j5, j6):
 
 
     ax = matplotlib.pyplot.figure().add_subplot(111, projection='3d')
-    chain.plot(target_joint_angels, ax)
+    chain.plot(target_joint_angels, ax, target=pk, show=True)
     matplotlib.pyplot.show()
 
-def inverse_kinematic(vector, rotate):
+def inverse_kinematic(vector, rotates):
     initial_joint_angels = [0, 0, 0.873, 1.265, 0, 0, 0]
     
-    rotate = eul2rot(rotate[0], rotate[1], rotate[2])
+    rotate = eul2rot(rotates[0], rotates[1], rotates[2])
     target_frame = to_transformation_matrix(vector, rotate)
     print(target_frame)
     invers_opt = inverse_kinematic_optimization(chain, target_frame, initial_joint_angels, orientation_mode="all")
@@ -113,8 +112,8 @@ def inverse_kinematic(vector, rotate):
 
 if __name__ == '__main__':
     target_vector = [-0.0, -0.0, -0.33]
-    target_rotate = [179.9677, -2.9292, -107.0298]
-    target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])
+    target_rotate = [180, -3, -107]
+    #target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])
     inverse_kinematic(target_vector, target_rotate)
 
     target_joint = [1.274, 1.134, 1.571, 0.0, 0.560, 0.0]
