@@ -56,6 +56,12 @@ class Port(Serial):
             if self.__work_w_port: self.write(bytes(cmd,'ascii'))
          
             self.state = Ok(cmd)
+            self.state_pos = self.readline().decode('ascii').strip()
+            if self.state_pos == "position complete":
+                #time.sleep(1)
+                print(self.state_pos)
+            else:
+                print(self.state_pos)
         except Exception as e:
             self.state = Error(cmd, e)
 

@@ -5,6 +5,11 @@ import argparse
 import json
 import time
 
+# Данные для калибровки
+# для J0 -
+# для J1 - 1 градус = 300 шагов
+# для J2 - 1 градус = 285 шагам
+
 #usage_port = '/dev/pts/8'
 #usage_port = '/dev/ttyUSB0'
 usage_port = None
@@ -200,6 +205,8 @@ if __name__ == '__main__':
                                    np.radians(j4), 
                                    np.radians(j5))
             robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+            #time.sleep(10)
+            robot.set_joint_pos((0, 0, 0, 0, 0, 0))
             
         else:
             print('coordinates')
