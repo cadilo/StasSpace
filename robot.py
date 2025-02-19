@@ -5,6 +5,12 @@ import argparse
 import json
 import time
 
+#Необходимо изменить цепочку urdf, чтобы она соответствовала реальности
+#Для этого необходимо подкорректировать граничные углы поворота осей
+#И сверить обатную кинематику с реальностью
+
+
+
 # Данные для калибровки
 # для J0 -
 # для J1 - 1 градус = 300 шагов
@@ -16,56 +22,30 @@ usage_port = None
 
 class RobotCalibration():
     k = np.array([
-        90 /     152.0,
-        44 /     -70.0,
-        90 /    -182.5,
-        90 /     113.5,
-        90 /  115550.0,
-        90 /      90.0,
+        90 /     152.0, #Исправить
+        300,
+        285,
+        1,
+        1,
+        1,
     ])
 
-    def units_to_degrees(self, units=(0, 0, 0, 0, 0, 0)):
-        return [ round(x,4) for x in np.array(units) * self.k ]
+    def steps_to_degrees(self, units=(0, 0, 0, 0, 0, 0)):
+        return [ round(x,4) for x in np.array(units) / self.k ]
 
-    def degrees_to_units(self, degrees=(0, 0, 0, 0, 0, 0)):
-        return [ round(x,4) for x in np.array(degrees) / self.k ]
+    def degrees_to_steps(self, degrees=(0, 0, 0, 0, 0, 0)):
+        return [ round(x,4) for x in np.array(degrees) * self.k ]
 
-class RobotState():
-    def __init__(self, joints=(0, 0, 0, 0, 0, 0), v=0, operation='', error=None):
-        self.joints = joints
-        self.v = v
-        self.operation = operation
-        self.error = error
-
-        self.mins = (-90, -50, -60, -90, -90, -180)
-        self.maxs = ( 90, 50, 60, 90, 90, 180)
-    
 class Robot():
     def __init__(self, port=usage_port, timeout=10000):
         self.port = Port(port)
         self.calibration = RobotCalibration()
-        self.state = RobotState()
         self.timeout = timeout
-
-    def set_speed(self, v):
-        try:
-            assert 1 <= v <= 100, f'Speed not in 1 <= {v} <= 100!'
-            self.port.set_speed(v)
-            self.state.v = v
-            self.state.operation = f'set_speed(v={v})'
-            self.state.error = None
-        except AssertionError as e:
-            self.state.error = str(e)
-            raise e
-        
-    def get_speed(self):
-        return self.state.v
 
     def set_joint_pos(self, joints=(0, 0, 0, 0, 0, 0)):
         try:
-            # for j_min, j, j_max in zip(self.state.mins, joints, self.state.maxs):
-            #     assert j_min <= j <= j_max, f'Joint not in {j_min} <= {j} <= {j_max}!'
-            #joints_u = self.calibration.degrees_to_units(joints)
+
+            joints = self.calibration.degrees_to_steps(joints)
             j1, j2, j3, j4, j5, j6 = joints
             self.port.G00(j1, j2, j3, j4, j5, j6)
             #self.port.is_ready(self.timeout)
@@ -75,12 +55,6 @@ class Robot():
         except AssertionError as e:
             self.state.error = str(e)
             raise e
-
-    def get_joint_pos(self):
-        return self.state.joints
-
-    def is_ready(self):
-        return self.state.error is None
 
     def start_programm(self, filename):
         print("Вызван метод start_programm")
