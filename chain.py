@@ -92,18 +92,22 @@ def forward_kinematic(j1, j2, j3, j4, j5, j6):
     chain.plot(target_joint_angels, ax, target=pk, show=True)
     matplotlib.pyplot.show()
 
+
+def out_red(text):
+    print("\033[34m{}".format(text))
+
+
 def inverse_kinematic(vector, rotates):
-    initial_joint_angels = [0.0, 0.0, 0.524, 1.135, 0.0, 1.570, 0.0]
+    initial_joint_angels = [0.0, 0.0, 0.524, 1.135, 0.0, 1.570, 0.0] #Домашняя позиция 
+    #initial_joint_angels = [0.0, 0.0, 0.89, 1.83, 0.0, 0.51, 0.0]
     
     rotate = eul2rot(rotates[0], rotates[1], rotates[2])
     target_frame = to_transformation_matrix(vector, rotate)
     print(target_frame)
 
-    to_vector, to_rotate = from_transformation_matrix(target_frame)
+    #to_vector, to_rotate = from_transformation_matrix(target_frame)
 
 
-    
-    #print (f"From Transformation Matrix: {to_vector, to_rotate}")
 
     invers_opt = inverse_kinematic_optimization(chain, target_frame, initial_joint_angels, orientation_mode="all")
     print(f"Invers non normilized: {invers_opt}")
@@ -120,10 +124,18 @@ def inverse_kinematic(vector, rotates):
     else:
         print("Значения выходят за допустимый диапазон")
     print(f"invers normilized: {joint_normilized}")
+
+    print(f'float result debug {[float(joint_normilized[i]) for i in range(4)]}')
+
+    result = [initial_joint_angels[i] - float(joint_normilized[i]) for i in range(4)]
+    result.extend(float(joint_normilized[i]) for i in range(-3, 0))
+
+    print(f'Result delta: {result}\n')
+
     ax = matplotlib.pyplot.figure().add_subplot(111, projection='3d')
     chain.plot(invers_opt, ax)
     matplotlib.pyplot.show()
-    return invers_opt
+    return result
 
 #def chech_complete_pos():
 

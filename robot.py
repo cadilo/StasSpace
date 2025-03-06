@@ -31,7 +31,7 @@ class RobotCalibration():
     ])
 
     def steps_to_degrees(self, units=(0, 0, 0, 0, 0, 0)):
-        return [ round(x,4) for x in np.array(units) / self.k ]
+        return int([ round(x,4) for x in np.array(units) / self.k ])
 
     def degrees_to_steps(self, degrees=(0, 0, 0, 0, 0, 0)):
         return [ round(x,4) for x in np.array(degrees) * self.k ]
@@ -46,7 +46,7 @@ class Robot():
         try:
 
             joints = self.calibration.degrees_to_steps(joints)
-            j1, j2, j3, j4, j5, j6 = joints
+            j1, j2, j3, j4, j5, j6 = [int(joints[i]) for i in range(6)]
             self.port.G00(j1, j2, j3, j4, j5, j6)
             #self.port.is_ready(self.timeout)
             self.state.joints = joints
