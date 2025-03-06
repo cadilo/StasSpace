@@ -37,14 +37,23 @@ def rot2eul(R):
 
 def checking_for_availability(j1, j2, j3, j4, j5, j6):
     
+    # joint_limits = [
+    # (-np.inf, np.inf),    # Joint 0 (fixed)
+    # (0.0, 2 * np.pi),     # Joint 1 (revolute)
+    # (0.6108, 1.13446),    # Joint 2 (revolute)
+    # (0.95993, 1.5708),    # Joint 3 (revolute)
+    # (0.0, 4.7123),        # Joint 4 (revolute)
+    # (0.0, np.pi),         # Joint 5 (revolute)
+    # (0.0, 4.71239)        # Joint 6 (revolute)
+    # ]
     joint_limits = [
     (-np.inf, np.inf),    # Joint 0 (fixed)
-    (0.0, 2 * np.pi),     # Joint 1 (revolute)
-    (0.6108, 1.13446),    # Joint 2 (revolute)
-    (0.95993, 1.5708),    # Joint 3 (revolute)
-    (0.0, 4.7123),        # Joint 4 (revolute)
-    (0.0, np.pi),         # Joint 5 (revolute)
-    (0.0, 4.71239)        # Joint 6 (revolute)
+    (-1.57, 1.57),     # Joint 1 (revolute)
+    (0.5236, 0.9599),    # Joint 2 (revolute)
+    (1.1345, 1.8326),    # Joint 3 (revolute)
+    (-3.14, 0.0),        # Joint 4 (revolute)
+    (-1.57, 1.57),         # Joint 5 (revolute)
+    (0.0, 3.1416)        # Joint 6 (revolute)
     ]
 
     joint_values = [j1, j2, j3, j4, j5, j6]
@@ -84,14 +93,20 @@ def forward_kinematic(j1, j2, j3, j4, j5, j6):
     matplotlib.pyplot.show()
 
 def inverse_kinematic(vector, rotates):
-    initial_joint_angels = [0, 0, 0.873, 1.265, 0, 0, 0]
+    initial_joint_angels = [0.0, 0.0, 0.524, 1.135, 0.0, 1.570, 0.0]
     
     rotate = eul2rot(rotates[0], rotates[1], rotates[2])
     target_frame = to_transformation_matrix(vector, rotate)
     print(target_frame)
+
+    to_vector, to_rotate = from_transformation_matrix(target_frame)
+
+
+    
+    #print (f"From Transformation Matrix: {to_vector, to_rotate}")
+
     invers_opt = inverse_kinematic_optimization(chain, target_frame, initial_joint_angels, orientation_mode="all")
     print(f"Invers non normilized: {invers_opt}")
-
     joint_normilized = [f"{v:.2f}" for v in invers_opt]
     flag = checking_for_availability(float(joint_normilized[0]), 
                                      float(joint_normilized[1]), 
@@ -110,11 +125,14 @@ def inverse_kinematic(vector, rotates):
     matplotlib.pyplot.show()
     return invers_opt
 
+#def chech_complete_pos():
+
+
 if __name__ == '__main__':
-    target_vector = [-0.0, -0.0, -0.33]
-    target_rotate = [180, -3, -107]
+    target_vector = [-0.50, 0.0, -0.25]
+    target_rotate = [-180, -5, 180]
     #target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])
     inverse_kinematic(target_vector, target_rotate)
 
-    target_joint = [1.274, 1.134, 1.571, 0.0, 0.560, 0.0]
-    forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])
+    target_joint = [0.0, 0.524, 1.135, 0.0, 1.570, 0.0]
+    #forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])
