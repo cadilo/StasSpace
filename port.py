@@ -78,6 +78,14 @@ class Port(Serial):
         except Exception as e:
             self.state = Error(cmd, e)
 
+    def G05(self, param):
+        try:
+            cmd = f'G05 {param}'
+            self.write(bytes(cmd, 'ascii'))
+
+        except Exception as e:
+            self.state = Error(cmd, e)
+
     def set_speed(self, vp=50):
         try:
             cmd = f'G07 VP={vp}\r\n'
@@ -110,15 +118,28 @@ if __name__ == '__main__':
     from queue import Queue
     q = Queue()
     p = Port(port="/dev/ttyUSB0", outfile=open('/tmp/log','w'), queue=q)
-    sleep(1)
-    p.G00(0, 0, 0, 50, 0, 50)
-    print("1 - +")
-    sleep(5)
-    k=p.G01()
-    print(k)
-    sleep(2)
-    p.G00(0, 0, 0, 100, 100, 100)
+    # sleep(1)
+    # p.G00(0, 0, 0, 50, 0, 0)
+    # print("1 - +")
+    # sleep(5)
+    # k=p.G01()
+    # print(k)
+    # sleep(2)
+    # p.G00(0, 0, 0, 100, 0, 0)
 
-    sleep(2)
-    p.G00(0, 0, 0, 0, 0, 0)
-    print("2 - +")
+    # k=p.G01()
+    # print(k)
+    # sleep(2)
+    # p.G00(0, 0, 0, 150, 0, 0)
+
+    # k=p.G01()
+    # print(k)
+    # sleep(2)
+    # p.G00(0, 0, 0, 200, 0, 0)
+
+    # sleep(2)
+    # p.G00(0, 0, 0, 0, 0, 0)
+    # print("2 - +")
+    p.G05(1)
+    sleep(3)
+    p.G05(0)

@@ -12,20 +12,20 @@ import time
 
 
 # Данные для калибровки
-# для J0 -
+# для J0 - 1 градус = 7
 # для J1 - 1 градус = 300 шагов
 # для J2 - 1 градус = 285 шагам
 
 #usage_port = '/dev/pts/8'
-#usage_port = '/dev/ttyUSB0'
-usage_port = None
+usage_port = '/dev/ttyUSB0'
+#usage_port = None
 
 class RobotCalibration():
     k = np.array([
-        90 /     152.0, #Исправить
+        7, 
         300,
         285,
-        1,
+        -1,
         1,
         1,
     ])
@@ -43,18 +43,14 @@ class Robot():
         self.timeout = timeout
 
     def set_joint_pos(self, joints=(0, 0, 0, 0, 0, 0)):
-        try:
+        
+        joints = self.calibration.degrees_to_steps(joints)
+        j1, j2, j3, j4, j5, j6 = [int(joints[i]) for i in range(6)]
+        self.port.G00(j1, j2, j3, j4, j5, j6)
 
-            joints = self.calibration.degrees_to_steps(joints)
-            j1, j2, j3, j4, j5, j6 = [int(joints[i]) for i in range(6)]
-            self.port.G00(j1, j2, j3, j4, j5, j6)
-            #self.port.is_ready(self.timeout)
-            self.state.joints = joints
-            self.state.operation = f'set_joint_pos(joints={joints})'
-            self.state.error = None
-        except AssertionError as e:
-            self.state.error = str(e)
-            raise e
+    def set_zero_pos(self):
+        self.port.G00(0, 0, 0, 0, 0, 0)
+        print(self.port.G01())
 
     def start_programm(self, filename):
         print("Вызван метод start_programm")
@@ -117,12 +113,12 @@ class Robot():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     ARGS = [
-        ('-X',  '--X',  float,   0, 'X position MM.'),
-        ('-Y',  '--Y',  float, 430, 'Y position MM.'),
-        ('-Z',  '--Z',  float, 277, 'Z position MM.'),
-        ('-rX', '--rX', float,   0, 'X tool rotation, degrees.'),
-        ('-rY', '--rY', float,   0, 'Y tool rotation, degrees.'),
-        ('-rZ', '--rZ', float,   0, 'Z tool rotation, degrees.'),
+        ('-X',  '--X',  float,   None, 'X position MM.'),
+        ('-Y',  '--Y',  float, None, 'Y position MM.'),
+        ('-Z',  '--Z',  float, None, 'Z position MM.'),
+        ('-rX', '--rX', float,   None, 'X tool rotation, degrees.'),
+        ('-rY', '--rY', float,   None, 'Y tool rotation, degrees.'),
+        ('-rZ', '--rZ', float,   None, 'Z tool rotation, degrees.'),
         ('-rot','--rot',  str, 'Z', 'Tool rotation axis.'),
         ('-j0', '--j0', int,   0, 'Joint #0 position, degrees.'),
         ('-j1', '--j1', int,   0, 'Joint #1 position, degrees.'),
@@ -132,7 +128,8 @@ if __name__ == '__main__':
         ('-j5', '--j5', int,   0, 'Joint #5 position, degrees.'),
         ('-s', '--speed', int,  70, 'Speed, percent.'),
         ('-sp', '--start_programm', str, None, 'Start programm filename'),
-        ('-wp', '--write_programm', str, None, 'Write programm filename')
+        ('-wp', '--write_programm', str, None, 'Write programm filename'),
+        ('-g01', '--G01', str, None, 'Send command G01')
     ]
     try:
         robot = Robot()
@@ -160,18 +157,45 @@ if __name__ == '__main__':
     speed = args.speed
     start_filename = args.start_programm
     write_filename = args.write_programm
+    G01 = args.G01
 
     vec = [X, Y, Z]
     rot = [rX, rY, rZ]
     print(rot)
 
+    # pos_1 = [[-0.7, 0.0, 0.2], [-180, -5, 180]]
+
+    # pos_2 = [[-0.6, 0.09, -0.1], [-180, -5, 180]]
+
+    # pos_3 = [[-0.71, 0.09, 0.26], [-92, 5, 175]]
+
+    pos_1 = [[-0.67, 0.0, 0.16], [-180, -5, 180]]
+
+    pos_2 = [[-0.67, 0.0, -0.1], [-180, -5, 180]]
+
+    # pos_3 = [[-0.71, 0.09, 0.26], [-92, 5, 175]]
+
+
     if start_filename is not None:
         robot.start_programm(start_filename)
     elif write_filename is not None:
         robot.write_programm(write_filename)
+    elif G01 is not None:
+        ik1 = inverse_kinematic(pos_1[0], pos_1[1])
+        j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik1 ][1:7]
+        robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+        time.sleep(20)
+
+
+        ik2 = inverse_kinematic(pos_2[0], pos_2[1])
+        j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik2 ][1:7]
+        robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+        time.sleep(20)
+
     else:
         if sum([j0, j1, j2, j3, j4, j5]):
             print('joints')
+            
             fk = forward_kinematic(np.radians(j0), 
                                    np.radians(j1),
                                    np.radians(j2), 
@@ -188,4 +212,5 @@ if __name__ == '__main__':
             j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik ][1:7]
             print(j0, j1, j2, j3, j4, j5)
             robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
+            robot.set_zero_pos()
 

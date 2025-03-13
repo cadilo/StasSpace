@@ -4,7 +4,7 @@ from ikpy.chain import Chain
 from ikpy.inverse_kinematics import inverse_kinematic_optimization
 from ikpy.utils.geometry import from_transformation_matrix, to_transformation_matrix
 import numpy as np
-chain = Chain.from_urdf_file("description.urdf", active_links_mask=[0, 1, 1, 1, 1, 1, 1])
+chain = Chain.from_urdf_file("description.urdf", active_links_mask=[0, 1, 1, 1, 1, 1, 1, 0])
 
 def eul2rot(alpha, beta, gamma):
     # Преобразуем углы из градусов в радианы
@@ -49,6 +49,7 @@ def checking_for_availability(j1, j2, j3, j4, j5, j6):
     joint_limits = [
     (-np.inf, np.inf),    # Joint 0 (fixed)
     (-1.57, 1.57),     # Joint 1 (revolute)
+    (-np.inf, np.inf),
     (0.5236, 0.9599),    # Joint 2 (revolute)
     (1.1345, 1.8326),    # Joint 3 (revolute)
     (-3.14, 0.0),        # Joint 4 (revolute)
@@ -73,7 +74,7 @@ def forward_kinematic(j1, j2, j3, j4, j5, j6):
     else:
         print("Значения выходят за допустимый диапазон")
 
-    target_joint_angels = [0, j1, j2, j3, j4, j5, j6]
+    target_joint_angels = [0, j1, j2, j3, j4, j5, j6, 0]
     pk = chain.forward_kinematics(target_joint_angels)
     print(f"{pk}") 
     Vector, Rotate = from_transformation_matrix(pk)
@@ -98,7 +99,7 @@ def out_red(text):
 
 
 def inverse_kinematic(vector, rotates):
-    initial_joint_angels = [0.0, 0.0, 0.524, 1.135, 0.0, 1.570, 0.0] #Домашняя позиция 
+    initial_joint_angels = [0.00, 0.00, 0.0, 0.0, 0.00, 0.00, 0.00, 0.00] #Домашняя позиция 
     #initial_joint_angels = [0.0, 0.0, 0.89, 1.83, 0.0, 0.51, 0.0]
     
     rotate = eul2rot(rotates[0], rotates[1], rotates[2])
@@ -128,7 +129,7 @@ def inverse_kinematic(vector, rotates):
     print(f'float result debug {[float(joint_normilized[i]) for i in range(4)]}')
 
     result = [initial_joint_angels[i] - float(joint_normilized[i]) for i in range(4)]
-    result.extend(float(joint_normilized[i]) for i in range(-3, 0))
+    result.extend(float(joint_normilized[i]) for i in range(-4, -1))
 
     print(f'Result delta: {result}\n')
 
@@ -141,10 +142,10 @@ def inverse_kinematic(vector, rotates):
 
 
 if __name__ == '__main__':
-    target_vector = [-0.50, 0.0, -0.25]
+    target_vector = [-0.67, 0.0, 0.16]
     target_rotate = [-180, -5, 180]
     #target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])
     inverse_kinematic(target_vector, target_rotate)
 
-    target_joint = [0.0, 0.524, 1.135, 0.0, 1.570, 0.0]
-    #forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])
+    target_joint = [0.00, 0.0, 0.0, 0.00, 1.57, 0.00]
+    forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])

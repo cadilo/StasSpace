@@ -3,24 +3,25 @@
 
 <!--BASE-->
   <link name="base_link">
-
+    <origin xyz="-0.07 0.0 0.0" rpy="0.0 0.0 0.0"/>
   </link>
 
 <!--J0-->
   <link name="J0">
     <visual>
       <geometry>
-        <cylinder length="0.01" radius="0.083"/>
+        <box size="0.1 0.1 0.1"/>
       </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
     </visual>
-    <origin xyz="0.0 0.0 0.05"/>
   </link>
 
   <joint name="joint_J0" type="revolute">
-  <limit lower="-1.57" upper="1.57" effort="0.0" velocity="0.0"/>
+    <limit lower="-1.57" upper="1.57" effort="0.0" velocity="0.0"/>
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="base_link"/>
     <child link="J0"/>
+    <origin xyz="0.0 0.0 0.0"/>
   </joint>
 
 <!--J1-->
@@ -30,15 +31,14 @@
         <cylinder length="0.15" radius="0.013"/>
       </geometry>
     </visual>
-    <origin xyz="0.0 0.0 0.05" />
   </link>
 
   <joint name="joint_J1" type="revolute">
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="J0"/>
     <child link="J1"/>
-    <origin rpy="1.5707 0.0 0.0" xyz="0.065 0.0 0.055"/>
-    <limit lower="0.5236" upper="0.9599" effort="0.0" velocity="0.0"/>
+    <origin rpy="1.57 -0.4363 0.0" xyz="0.07 0.0 0.0"/>
+    <limit lower="0.0" upper="0.6109" effort="0.0" velocity="0.0"/>
   </joint>
 
 <!--J2-->
@@ -56,8 +56,8 @@
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="J1"/>
     <child link="J2"/>
-    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.42 0.0"/>
-    <limit lower="1.1345" upper="1.8326" effort="0.0" velocity="0.0"/>
+    <origin rpy="0.0 0.0 1.2217" xyz="0.0 0.425 0.0"/>
+    <limit lower="0.0" upper="0.6109" effort="0.0" velocity="0.0"/>
   </joint>
 
 <!--J3-->
@@ -75,7 +75,7 @@
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="J2"/>
     <child link="J3"/>
-    <origin rpy="1.57 0.0 -0.174533" xyz="0.0 0.44 0.0"/>
+    <origin rpy="1.57 0.0 -0.174533" xyz="0.0 0.445 0.0"/>
   </joint>
 
 <!--J4-->
@@ -111,6 +111,21 @@
     <axis xyz="0.0 0.0 1.0"/>
     <parent link="J4"/>
     <child link="J5"/>
-    <origin rpy="-1.5708 0.0 0.0" xyz="0.0 0.087 0.0"/>
+    <origin rpy="-1.5708 0.0 0.0" xyz="0.0 0.09 0.0"/>
+  </joint>
+
+<!--TOOL-->
+  <link name="TOOL">
+    <visual>
+      <geometry>
+        <cylinder length="0.007" radius="0.045"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="TOOL_joint" type="fixed">
+    <parent link="J5"/>
+    <child link="TOOL"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.11"/>
   </joint>
 </robot>
