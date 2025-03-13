@@ -5,20 +5,14 @@ import argparse
 import json
 import time
 
-#Необходимо изменить цепочку urdf, чтобы она соответствовала реальности
-#Для этого необходимо подкорректировать граничные углы поворота осей
-#И сверить обатную кинематику с реальностью
-
-
-
 # Данные для калибровки
-# для J0 - 1 градус = 7
+# для J0 - 1 градус = 7 шагов
 # для J1 - 1 градус = 300 шагов
 # для J2 - 1 градус = 285 шагам
 
 #usage_port = '/dev/pts/8'
-usage_port = '/dev/ttyUSB0'
-#usage_port = None
+#usage_port = '/dev/ttyUSB0'
+usage_port = None
 
 class RobotCalibration():
     k = np.array([
@@ -186,11 +180,12 @@ if __name__ == '__main__':
         robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
         time.sleep(20)
 
-
         ik2 = inverse_kinematic(pos_2[0], pos_2[1])
         j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik2 ][1:7]
         robot.set_joint_pos((j0, j1, j2, j3, j4, j5))
         time.sleep(20)
+
+        robot.set_zero_pos()
 
     else:
         if sum([j0, j1, j2, j3, j4, j5]):
@@ -208,6 +203,7 @@ if __name__ == '__main__':
             
         else:
             print('coordinates')
+            print(vec, rot)
             ik = inverse_kinematic(vec, rot)
             j0, j1, j2, j3, j4, j5 = [ round(np.degrees(x),2) for x in ik ][1:7]
             print(j0, j1, j2, j3, j4, j5)

@@ -36,25 +36,14 @@ def rot2eul(R):
     return [np.degrees(x) for x in [alpha, beta, gamma]]
 
 def checking_for_availability(j1, j2, j3, j4, j5, j6):
-    
-    # joint_limits = [
-    # (-np.inf, np.inf),    # Joint 0 (fixed)
-    # (0.0, 2 * np.pi),     # Joint 1 (revolute)
-    # (0.6108, 1.13446),    # Joint 2 (revolute)
-    # (0.95993, 1.5708),    # Joint 3 (revolute)
-    # (0.0, 4.7123),        # Joint 4 (revolute)
-    # (0.0, np.pi),         # Joint 5 (revolute)
-    # (0.0, 4.71239)        # Joint 6 (revolute)
-    # ]
+    print(f'Check joints: {j1, j2, j3, j4, j5, j6}')
     joint_limits = [
-    (-np.inf, np.inf),    # Joint 0 (fixed)
     (-1.57, 1.57),     # Joint 1 (revolute)
-    (-np.inf, np.inf),
-    (0.5236, 0.9599),    # Joint 2 (revolute)
-    (1.1345, 1.8326),    # Joint 3 (revolute)
+    (0.0, 0.6109),    # Joint 2 (revolute)
+    (0.0, 0.6109),    # Joint 3 (revolute)
     (-3.14, 0.0),        # Joint 4 (revolute)
     (-1.57, 1.57),         # Joint 5 (revolute)
-    (0.0, 3.1416)        # Joint 6 (revolute)
+    (0.0, 3.1416),        # Joint 6 (revolute)
     ]
 
     joint_values = [j1, j2, j3, j4, j5, j6]
@@ -66,9 +55,9 @@ def checking_for_availability(j1, j2, j3, j4, j5, j6):
     return True  # Все значения в пределах
 
 def forward_kinematic(j1, j2, j3, j4, j5, j6):
-    #print(f"Debug: {j1, j2, j3, j4, j5, j6}")
+    print(f"Debug: {j1, j2, j3, j4, j5, j6}")
     flag = checking_for_availability(j1, j2, j3, j4, j5, j6)
-    
+    print(f'flag = {flag}')
     if flag:
         print("Значения входят в допустимый диапазон")
     else:
@@ -99,27 +88,26 @@ def out_red(text):
 
 
 def inverse_kinematic(vector, rotates):
-    initial_joint_angels = [0.00, 0.00, 0.0, 0.0, 0.00, 0.00, 0.00, 0.00] #Домашняя позиция 
-    #initial_joint_angels = [0.0, 0.0, 0.89, 1.83, 0.0, 0.51, 0.0]
+    initial_joint_angels = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00] #Домашняя позиция 
+    
     
     rotate = eul2rot(rotates[0], rotates[1], rotates[2])
     target_frame = to_transformation_matrix(vector, rotate)
     print(target_frame)
 
-    #to_vector, to_rotate = from_transformation_matrix(target_frame)
-
-
-
     invers_opt = inverse_kinematic_optimization(chain, target_frame, initial_joint_angels, orientation_mode="all")
     print(f"Invers non normilized: {invers_opt}")
+
     joint_normilized = [f"{v:.2f}" for v in invers_opt]
-    flag = checking_for_availability(float(joint_normilized[0]), 
-                                     float(joint_normilized[1]), 
-                                     float(joint_normilized[2]),
+
+    flag = checking_for_availability(float(joint_normilized[1]), 
+                                     float(joint_normilized[2]), 
                                      float(joint_normilized[3]),
                                      float(joint_normilized[4]),
-                                     float(joint_normilized[5]))
+                                     float(joint_normilized[5]),
+                                     float(joint_normilized[6]))
     
+    print(f'flag = {flag}')
     if flag:
         print("Значения входят в допустимый диапазон")
     else:
@@ -138,14 +126,11 @@ def inverse_kinematic(vector, rotates):
     matplotlib.pyplot.show()
     return result
 
-#def chech_complete_pos():
-
 
 if __name__ == '__main__':
     target_vector = [-0.67, 0.0, 0.16]
     target_rotate = [-180, -5, 180]
-    #target_rotate = eul2rot(target_rotate[0], target_rotate[1], target_rotate[2])
     inverse_kinematic(target_vector, target_rotate)
 
-    target_joint = [0.00, 0.0, 0.0, 0.00, 1.57, 0.00]
-    forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])
+    target_joint = [0.0, 0.0, 0.0, 0.00, 1.56, 0.00]
+    #forward_kinematic(target_joint[0], target_joint[1], target_joint[2], target_joint[3], target_joint[4], target_joint[5])
